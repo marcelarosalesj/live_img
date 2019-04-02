@@ -14,8 +14,10 @@ install_package() {
 		echo "$pkg already installed"
 	else
 		echo "Installing $pkg..."
-		sudo apt-get install -y $pkg $> /dev/null
-		retcode=${PIPESTATUS[0]}
+		#sudo apt-get install -y $pkg $> /dev/null
+		#retcode=${PIPESTATUS[0]}
+		sudo apt-get install -y $pkg
+		retcode=$?
 		if [ $retcode -eq 1 ]; then
 			echo "Errors intalling $pkg"
 		fi
@@ -23,6 +25,9 @@ install_package() {
 }
 
 # Install dependencies
+sudo apt-get clean
+sudo apt-get update -y
+sudo apt-get upgrade -y
 install_package livecd-rootfs
 install_package systemd-container
 install_package xorriso
@@ -51,7 +56,7 @@ if [ $# -eq 1 ]; then
 	http_proxy=$1
 	PROJECT="ubuntu-core" lb config --apt-http-proxy "$http_proxy" --apt-ftp-proxy "$http_proxy"
 else
-	PROJECT="ubuntu-core" lb config	
+	PROJECT="ubuntu-core" lb config
 fi
 
 sed -i 's/precise/xenial/g' config/bootstrap
@@ -59,3 +64,28 @@ sed -i 's/precise/xenial/g' config/bootstrap
 echo "Execute lb build"
 mkdir chroot
 sudo PROJECT="ubuntu-core" lb build
+
+if [ $? -eq 0 ]; then
+	echo ">> Adding config files"
+
+    sudo cp /etc/apt/sources.list chroot/etc/apt/
+    echo "ubuntu-live" | sudo tee chroot/etc/hostname
+    echo "127.0.0.1 ubuntu-live" | sudo tee chroot/etc/hosts
+
+    #echo "Print set your password using passwd command, then exit"
+    #sudo chroot chroot
+	#sudo systemd-nspawn -b -D chroot --machine bla ../config_rootfs.sh
+
+	cp ../grub.cfg chroot/boot/grub
+	cp ../config_rootfs.sh chroot/
+	sudo systemd-nspawn -D chroot --machine blabla ./config_rootfs.sh
+
+	echo ">> generate iso"
+	mkdir -P iso/live
+	sudo cp -a chroot/boot iso/
+	sudo mksquashfs chroot iso/live/filesystem.squashfs
+	sudo grub-mkrescue -o ubuntu-live.iso iso
+
+else
+    echo "Error with lb build command"
+fi
