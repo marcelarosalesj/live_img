@@ -56,6 +56,11 @@ cp chroot/etc/shadow chroot/etc/shadow_backup
 sed '/^root:/ s|\*||' -i chroot/etc/shadow
 cp chroot/etc/securetty chroot/etc/securetty_backup
 
+# Add special deb file to rootfb
+mkdir -p chroot/stxdebs
+cp fm-common-dev_0.0-1_amd64.deb chroot/stxdebs
+cp fm-mgr_0.0-1_amd64.deb chroot/stxdebs
+
 # Configure rootfs with config_rootfs.sh script
 sudo systemd-nspawn -D chroot --machine genubuntu ./config_rootfs.sh
 retcode=$?
