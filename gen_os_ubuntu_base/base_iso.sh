@@ -51,7 +51,13 @@ fi
 cp grub.cfg chroot/boot/grub/
 cp config_rootfs.sh chroot/
 
-sudo systemd-nspawn -D chroot --machine blabla ./config_rootfs.sh
+# Allow empty password for root user
+cp chroot/etc/shadow chroot/etc/shadow_backup
+sed '/^root:/ s|\*||' -i chroot/etc/shadow
+cp chroot/etc/securetty chroot/etc/securetty_backup
+
+# Configure rootfs with config_rootfs.sh script
+sudo systemd-nspawn -D chroot --machine genubuntu ./config_rootfs.sh
 retcode=$?
 if [ $retcode -eq 0 ]; then
     echo "continue with iso generation..."

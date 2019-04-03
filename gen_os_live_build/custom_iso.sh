@@ -72,10 +72,15 @@ if [ $? -eq 0 ]; then
     echo "ubuntu-live" | sudo tee chroot/etc/hostname
     echo "127.0.0.1 ubuntu-live" | sudo tee chroot/etc/hosts
 
+    # Allow empty password
+    sudo cp chroot/etc/shadow chroot/etc/shadow_backup
+    sudo sed '/^root:/ s|\*||' -i chroot/etc/shadow
+    sudo cp chroot/etc/securetty chroot/etc/securetty_backup
+    #
     sudo mkdir -p chroot/boot/grub/
     sudo cp ../grub.cfg chroot/boot/grub/
     sudo cp ../config_rootfs.sh chroot/
-    sudo systemd-nspawn -D chroot --machine blabla ./config_rootfs.sh
+    sudo systemd-nspawn -D chroot --machine genlb ./config_rootfs.sh
     retcode=$?
     if [ $retcode -eq 0 ]; then
         echo ">> generate iso"
