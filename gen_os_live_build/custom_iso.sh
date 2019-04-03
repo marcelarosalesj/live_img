@@ -75,12 +75,16 @@ if [ $? -eq 0 ]; then
     cp ../grub.cfg chroot/boot/grub/
     cp ../config_rootfs.sh chroot/
     sudo systemd-nspawn -D chroot --machine blabla ./config_rootfs.sh
-
-    echo ">> generate iso"
-    mkdir -p iso/live
-    sudo cp -a chroot/boot/ iso/
-    sudo mksquashfs chroot iso/live/filesystem.squashfs
-    sudo grub-mkrescue -o ubuntu-live.iso iso
+    retcode=$?
+    if [ $retcode -eq 0 ]; then
+        echo ">> generate iso"
+        mkdir -p iso/live
+        sudo cp -a chroot/boot/ iso/
+        sudo mksquashfs chroot iso/live/filesystem.squashfs
+        sudo grub-mkrescue -o ubuntu-live.iso iso
+    else
+        echo "systemd-nspawn failed..."
+    fi
 else
     echo "Error with lb build command"
 fi
