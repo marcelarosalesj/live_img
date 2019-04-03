@@ -72,8 +72,9 @@ if [ $? -eq 0 ]; then
     echo "ubuntu-live" | sudo tee chroot/etc/hostname
     echo "127.0.0.1 ubuntu-live" | sudo tee chroot/etc/hosts
 
-    cp ../grub.cfg chroot/boot/grub/
-    cp ../config_rootfs.sh chroot/
+    sudo mkdir -p chroot/boot/grub/
+    sudo cp ../grub.cfg chroot/boot/grub/
+    sudo cp ../config_rootfs.sh chroot/
     sudo systemd-nspawn -D chroot --machine blabla ./config_rootfs.sh
     retcode=$?
     if [ $retcode -eq 0 ]; then
