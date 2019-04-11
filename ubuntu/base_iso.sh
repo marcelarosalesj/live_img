@@ -5,6 +5,7 @@ set -x
 OS="ubuntu-base-16.04.6-base-amd64.tar.gz"
 URL="http://cdimage.ubuntu.com/ubuntu-base/releases/16.04/release/$OS"
 CHROOT="chroot"
+ISO="iso"
 
 install_package() {
 	pkg=$1
@@ -16,16 +17,17 @@ install_package() {
 		echo "Installing $pkg..."
 		sudo apt-get install -y $pkg
 		retcode=$?
-		if [ $retcode -eq 1 ]; then
-			echo "Errors intalling $pkg"
+        if [ $retcode -eq 1 ]; then
+            echo "Errors intalling $pkg"
+            exit -1
 		fi
 	fi
 }
 
 # Install dependencies
-sudo apt-get clean
-sudo apt-get update -y
-sudo apt-get upgrade -y
+sudo apt-get clean || exit -1
+sudo apt-get update -y || exit -1
+sudo apt-get upgrade -y || exit -1
 install_package livecd-rootfs
 install_package systemd-container
 install_package xorriso
@@ -58,9 +60,10 @@ cp -r stxdebs $CHROOT/usr/local
 sudo systemd-nspawn -D $CHROOT --machine genubuntu ./config_rootfs.sh
 retcode=$?
 if [ $retcode -eq 0 ]; then
-    mkdir -p iso/live
-    sudo cp -a $CHROOT/boot/ iso/
-    sudo mksquashfs $CHROOT iso/live/filesystem.squashfs
+    [ -d $ISO ] && sudo rm -rf $ISO
+    mkdir -p $ISO/live
+    sudo cp -a $CHROOT/boot/ $ISO/
+    sudo mksquashfs $CHROOT $ISO/live/filesystem.squashfs
     sudo grub-mkrescue -o ubuntu-live.iso iso
 else
     echo "Error with systemd-nspawn"
