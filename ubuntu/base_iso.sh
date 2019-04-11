@@ -31,6 +31,7 @@ sudo apt-get upgrade -y || exit -1
 install_package livecd-rootfs
 install_package systemd-container
 install_package xorriso
+install_package grub-pc
 
 # Download OS tarball if it does not exist
 [ ! -e $OS ] && wget $URL
