@@ -30,7 +30,7 @@ apt-get install -y \
 	net-tools \
         vim \
         strace \
-        ping
+        iputils-ping
 
 # Create Apt Local Repo for StarlingX packages
 apt-get install -y dpkg-dev

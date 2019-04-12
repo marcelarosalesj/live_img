@@ -58,10 +58,10 @@ cp -r stxdebs $CHROOT/
 cp -r stxdebs $CHROOT/usr/local
 
 # Configure rootfs with config_rootfs.sh script
-EXTRA_ARGS=" --keep-unit --register=no" #
-EXTRA_ARGS+=" --machine genubuntu"      # systemd machine name
-[[ -v http_proxy  ]] && EXTRA_ARGS+=" -E http_proxy=${http_proxy}"    # proxy
-[[ -v https_proxy  ]] && EXTRA_ARGS+=" -E https_proxy=${https_proxy}" # proxy
+EXTRA_ARGS=" --machine genubuntu"      # systemd machine name
+[ -f /.dockerenv ] && EXTRA_ARGS+=" --keep-unit --register=no"
+[ -v http_proxy  ] && EXTRA_ARGS+=" --setenv=http_proxy=${http_proxy}"
+[ -v https_proxy ] && EXTRA_ARGS+=" --setenv=https_proxy=${https_proxy}"
 sudo systemd-nspawn -D $CHROOT $EXTRA_ARGS ./config_rootfs.sh
 retcode=$?
 if [ $retcode -eq 0 ]; then
