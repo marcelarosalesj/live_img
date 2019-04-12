@@ -19,15 +19,15 @@ install_package() {
 		retcode=$?
         if [ $retcode -eq 1 ]; then
             echo "Errors intalling $pkg"
-            exit -1
-		fi
-	fi
+            exit 1
+        fi
+    fi
 }
 
 # Install dependencies
-sudo apt-get clean || exit -1
-sudo apt-get update -y || exit -1
-sudo apt-get upgrade -y || exit -1
+sudo apt-get clean || exit 1
+sudo apt-get update -y || exit 1
+sudo apt-get upgrade -y || exit 1
 install_package livecd-rootfs
 install_package systemd-container
 install_package xorriso
@@ -58,7 +58,11 @@ cp -r stxdebs $CHROOT/
 cp -r stxdebs $CHROOT/usr/local
 
 # Configure rootfs with config_rootfs.sh script
-sudo systemd-nspawn -D $CHROOT --machine genubuntu ./config_rootfs.sh
+EXTRA_ARGS=" --keep-unit --register=no" #
+EXTRA_ARGS+=" --machine genubuntu"      # systemd machine name
+[[ -v http_proxy  ]] && EXTRA_ARGS+=" -E http_proxy=${http_proxy}"    # proxy
+[[ -v https_proxy  ]] && EXTRA_ARGS+=" -E https_proxy=${https_proxy}" # proxy
+sudo systemd-nspawn -D $CHROOT $EXTRA_ARGS ./config_rootfs.sh
 retcode=$?
 if [ $retcode -eq 0 ]; then
     [ -d $ISO ] && sudo rm -rf $ISO
@@ -68,5 +72,5 @@ if [ $retcode -eq 0 ]; then
     sudo grub-mkrescue -o ubuntu-live.iso iso
 else
     echo "Error with systemd-nspawn"
-    exit -1
+    exit 1
 fi

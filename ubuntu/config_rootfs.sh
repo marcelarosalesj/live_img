@@ -28,8 +28,9 @@ apt-get install -y \
 	lvm2 \
 	e2fsprogs \
 	net-tools \
-    vim \
-    strace
+        vim \
+        strace \
+        ping
 
 # Create Apt Local Repo for StarlingX packages
 apt-get install -y dpkg-dev
